@@ -1,0 +1,13 @@
+# arquivos gerados na compilacao
+*.exe
+*.o
+*.obj
+build/
+bin/
+
+# configuracoes do vs code
+.vscode/
+
+# arquivos do windows
+Thumbs.db
+desktop.ini
