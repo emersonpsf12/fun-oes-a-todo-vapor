@@ -1,7 +1,9 @@
 
+#include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
 
 #define LARGURA 800
 #define ALTURA 600
@@ -29,79 +31,20 @@ void desenhaTexto(ALLEGRO_FONT *fonte, ALLEGRO_COLOR cor,
     al_use_transform(&t);
 }
 
-// Folha de caderno: papel, linhas azuis, margem vermelha e furos
-void desenhaCaderno()
-{
-    int y;
-
-    al_clear_to_color(al_map_rgb(250, 247, 232));
-
-    for (y = 40; y < ALTURA; y += 28)
-    {
-        al_draw_line(0, y, LARGURA, y, al_map_rgb(175, 205, 235), 1);
-    }
-
-    al_draw_line(90, 0, 90, ALTURA, al_map_rgb(230, 120, 120), 2);
-
-    for (y = 50; y < ALTURA; y += 100)
-    {
-        al_draw_filled_circle(40, y, 10, al_map_rgb(70, 70, 80));
-    }
-}
-
-// Rabiscos de funcoes no fundo, como se fossem feitos a lapis
-void desenhaRabiscos(ALLEGRO_FONT *fonte)
-{
-    ALLEGRO_COLOR lapis = al_map_rgb(185, 190, 205);
-    float x;
-
-    desenhaTexto(fonte, lapis, 230, 50, 2, "f(x) = 2x + 1");
-    desenhaTexto(fonte, lapis, 620, 75, 2, "y = x² - 4");
-    desenhaTexto(fonte, lapis, 210, 345, 2, "f(x) = -x + 3");
-    desenhaTexto(fonte, lapis, 650, 330, 2, "y = ax + b");
-    desenhaTexto(fonte, lapis, 400, 500, 2, "f(0) = 1");
-
-    // grafico de uma reta (y = x), no canto de baixo da esquerda
-    al_draw_line(130, 500, 290, 500, lapis, 2);
-    al_draw_line(210, 420, 210, 580, lapis, 2);
-    al_draw_line(150, 560, 270, 440, lapis, 2);
-
-    // grafico de uma parabola (y = x * x), no canto de baixo da direita
-    al_draw_line(560, 560, 740, 560, lapis, 2);
-    al_draw_line(650, 430, 650, 580, lapis, 2);
-
-    for (x = -3; x < 3; x += 0.25)
-    {
-        float x2 = x + 0.25;
-
-        // cada unidade vale 25 pixels na largura e 12 na altura
-        al_draw_line(650 + x * 25, 560 - x * x * 12,
-            650 + x2 * 25, 560 - x2 * x2 * 12, lapis, 2);
-    }
-}
-
-void desenhaTelaInicial(ALLEGRO_FONT *fonte)
+// Tela inicial: a capa e uma imagem e so o botao e desenhado no codigo
+void desenhaTelaInicial(ALLEGRO_FONT *fonte, ALLEGRO_BITMAP *capa)
 {
     ALLEGRO_COLOR azul = al_map_rgb(15, 35, 85);
     ALLEGRO_COLOR amarelo = al_map_rgb(255, 210, 40);
 
-    desenhaCaderno();
-    desenhaRabiscos(fonte);
-
-    // titulo com uma faixa amarela, igual marca texto
-    al_draw_filled_rectangle(170, 125, 630, 195, amarelo);
-    desenhaTexto(fonte, azul, 400, 132, 7, "FUNÇÕES");
-    desenhaTexto(fonte, azul, 400, 215, 5, "A TODO VAPOR");
-
-    desenhaTexto(fonte, azul, 400, 285, 2, "Monte o gráfico da função!");
+    // desenha a imagem esticada para ocupar a janela inteira
+    al_draw_scaled_bitmap(capa, 0, 0,
+        al_get_bitmap_width(capa), al_get_bitmap_height(capa),
+        0, 0, LARGURA, ALTURA, 0);
 
     // botao jogar
     al_draw_filled_rounded_rectangle(290, 385, 510, 445, 10, 10, azul);
     desenhaTexto(fonte, amarelo, 400, 403, 3, "JOGAR");
-
-    desenhaTexto(fonte, azul, 400, 462, 1.5, "Aperte ENTER para começar");
-
-    desenhaTexto(fonte, azul, 400, 585, 1, "Projeto Integrador - BCC");
 }
 
 void desenhaJogo(ALLEGRO_FONT *fonte)
@@ -135,12 +78,22 @@ int main()
     al_init();
     al_init_primitives_addon();
     al_init_font_addon();
+    al_init_image_addon();
     al_install_keyboard();
 
     ALLEGRO_DISPLAY *janela = al_create_display(LARGURA, ALTURA);
     ALLEGRO_EVENT_QUEUE *fila = al_create_event_queue();
     ALLEGRO_TIMER *timer = al_create_timer(1.0 / 60);
     ALLEGRO_FONT *fonte = al_create_builtin_font();
+
+    // imagem da capa do jogo
+    ALLEGRO_BITMAP *capa = al_load_bitmap("imagens/capa.png");
+
+    if (capa == NULL)
+    {
+        printf("Erro: nao achei a imagem imagens/capa.png\n");
+        return 1;
+    }
 
     al_set_window_title(janela, "Funções a Todo Vapor");
 
@@ -175,7 +128,7 @@ int main()
         if (evento.type == ALLEGRO_EVENT_TIMER)
         {
             if (tela == TELA_INICIAL)
-                desenhaTelaInicial(fonte);
+                desenhaTelaInicial(fonte, capa);
             else
                 desenhaJogo(fonte);
 
@@ -183,6 +136,7 @@ int main()
         }
     }
 
+    al_destroy_bitmap(capa);
     al_destroy_font(fonte);
     al_destroy_timer(timer);
     al_destroy_event_queue(fila);

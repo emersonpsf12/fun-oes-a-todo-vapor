@@ -1,4 +1,4 @@
-Funções a todo vapor.
+﻿Funções a todo vapor.
 
 Projeto integrador BCC
 
@@ -13,7 +13,7 @@ ESC: fecha o jogo.
 
 Para compilar precisa ter o MinGW e o Allegro 5 instalados.
 
-gcc main.c -o jogo -lallegro -lallegro\_primitives -lallegro\_font -lm
+gcc main.c -o jogo -lallegro -lallegro\_primitives -lallegro\_font -lallegro\_image -lm
 
 
 
