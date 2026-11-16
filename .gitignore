@@ -5,28 +5,15 @@
 build/
 bin/
 
+# bibliotecas DLL do Allegro
+*.dll
+
+# arquivos temporarios
+*.log
+
 # configuracoes do vs code
 .vscode/
 
 # arquivos do windows
 Thumbs.db
 desktop.ini
-
-# Bibliotecas DLL do Allegro
-*.dll
-
-# Arquivos compilados
-*.exe
-*.o
-*.obj
-
-# Arquivos temporários
-*.log
-*.dll
-*.exe
-*.o
-*.obj
-*.log
-
-# Bibliotecas do Allegro
-*.dll
