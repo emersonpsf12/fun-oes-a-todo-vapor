@@ -11,6 +11,7 @@ int main()
     al_init();
     al_init_primitives_addon();
     al_init_font_addon();
+    al_install_keyboard();
 
     ALLEGRO_DISPLAY *janela = al_create_display(LARGURA, ALTURA);
     ALLEGRO_EVENT_QUEUE *fila = al_create_event_queue();
@@ -19,6 +20,7 @@ int main()
 
     al_register_event_source(fila, al_get_display_event_source(janela));
     al_register_event_source(fila, al_get_timer_event_source(timer));
+    al_register_event_source(fila, al_get_keyboard_event_source());
 
     al_start_timer(timer);
 
@@ -31,6 +33,13 @@ int main()
 
         if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             rodando = 0;
+
+        // ESC fecha o jogo
+        if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
+        {
+            if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                rodando = 0;
+        }
 
         if (evento.type == ALLEGRO_EVENT_TIMER)
         {
