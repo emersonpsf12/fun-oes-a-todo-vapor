@@ -11,3 +11,22 @@ bin/
 # arquivos do windows
 Thumbs.db
 desktop.ini
+
+# Bibliotecas DLL do Allegro
+*.dll
+
+# Arquivos compilados
+*.exe
+*.o
+*.obj
+
+# Arquivos temporários
+*.log
+*.dll
+*.exe
+*.o
+*.obj
+*.log
+
+# Bibliotecas do Allegro
+*.dll
