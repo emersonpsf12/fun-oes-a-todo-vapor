@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -31,20 +30,13 @@ void desenhaTexto(ALLEGRO_FONT *fonte, ALLEGRO_COLOR cor,
     al_use_transform(&t);
 }
 
-// Tela inicial: a capa e uma imagem e so o botao e desenhado no codigo
-void desenhaTelaInicial(ALLEGRO_FONT *fonte, ALLEGRO_BITMAP *capa)
+// Tela inicial: a capa e uma imagem. O jogo comeca com ENTER.
+void desenhaTelaInicial(ALLEGRO_BITMAP *capa)
 {
-    ALLEGRO_COLOR azul = al_map_rgb(15, 35, 85);
-    ALLEGRO_COLOR amarelo = al_map_rgb(255, 210, 40);
-
     // desenha a imagem esticada para ocupar a janela inteira
     al_draw_scaled_bitmap(capa, 0, 0,
         al_get_bitmap_width(capa), al_get_bitmap_height(capa),
         0, 0, LARGURA, ALTURA, 0);
-
-    // botao jogar
-    al_draw_filled_rounded_rectangle(290, 385, 510, 445, 10, 10, azul);
-    desenhaTexto(fonte, amarelo, 400, 403, 3, "JOGAR");
 }
 
 void desenhaJogo(ALLEGRO_FONT *fonte)
@@ -128,7 +120,7 @@ int main()
         if (evento.type == ALLEGRO_EVENT_TIMER)
         {
             if (tela == TELA_INICIAL)
-                desenhaTelaInicial(fonte, capa);
+                desenhaTelaInicial(capa);
             else
                 desenhaJogo(fonte);
 
