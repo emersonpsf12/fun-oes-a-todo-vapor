@@ -11,25 +11,6 @@
 #define TELA_INICIAL 0
 #define TELA_JOGO 1
 
-// A fonte padrao do Allegro e bem pequena, entao essa funcao
-// desenha o texto aumentado. O x e o centro do texto.
-void desenhaTexto(ALLEGRO_FONT *fonte, ALLEGRO_COLOR cor,
-    float x, float y, float escala, const char *texto)
-{
-    ALLEGRO_TRANSFORM t;
-
-    al_identity_transform(&t);
-    al_scale_transform(&t, escala, escala);
-    al_translate_transform(&t, x, y);
-    al_use_transform(&t);
-
-    al_draw_text(fonte, cor, 0, 0, ALLEGRO_ALIGN_CENTER, texto);
-
-    // volta o desenho para o tamanho normal
-    al_identity_transform(&t);
-    al_use_transform(&t);
-}
-
 // Tela inicial: a capa e uma imagem. O jogo comeca com ENTER.
 void desenhaTelaInicial(ALLEGRO_BITMAP *capa)
 {
@@ -73,10 +54,17 @@ int main()
     al_init_image_addon();
     al_install_keyboard();
 
+    // deixa as imagens lisas quando o jogo e esticado na tela cheia
+    al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
+
     ALLEGRO_DISPLAY *janela = al_create_display(LARGURA, ALTURA);
     ALLEGRO_EVENT_QUEUE *fila = al_create_event_queue();
     ALLEGRO_TIMER *timer = al_create_timer(1.0 / 60);
     ALLEGRO_FONT *fonte = al_create_builtin_font();
+
+    // o jogo e desenhado nessa folha de 800x600 e depois
+    // a folha e esticada para o tamanho da janela
+    ALLEGRO_BITMAP *folha = al_create_bitmap(LARGURA, ALTURA);
 
     // imagem da capa do jogo
     ALLEGRO_BITMAP *capa = al_load_bitmap("imagens/capa.png");
@@ -97,6 +85,7 @@ int main()
 
     int rodando = 1;
     int tela = TELA_INICIAL;
+    int telaCheia = 0;
 
     while (rodando)
     {
@@ -112,6 +101,13 @@ int main()
             if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                 rodando = 0;
 
+            // F11 liga e desliga a tela cheia
+            if (evento.keyboard.keycode == ALLEGRO_KEY_F11)
+            {
+                telaCheia = !telaCheia;
+                al_set_display_flag(janela, ALLEGRO_FULLSCREEN_WINDOW, telaCheia);
+            }
+
             // ENTER na tela inicial comeca o jogo
             if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER && tela == TELA_INICIAL)
                 tela = TELA_JOGO;
@@ -119,15 +115,38 @@ int main()
 
         if (evento.type == ALLEGRO_EVENT_TIMER)
         {
+            // 1) desenha o jogo na folha de 800x600
+            al_set_target_bitmap(folha);
+
             if (tela == TELA_INICIAL)
                 desenhaTelaInicial(capa);
             else
                 desenhaJogo(fonte);
 
+            // 2) estica a folha para caber na janela sem deformar
+            al_set_target_backbuffer(janela);
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+
+            float larguraJanela = al_get_display_width(janela);
+            float alturaJanela = al_get_display_height(janela);
+
+            float escala = larguraJanela / LARGURA;
+
+            if (alturaJanela / ALTURA < escala)
+                escala = alturaJanela / ALTURA;
+
+            // o que sobra vira faixa preta dos dois lados
+            float sobraX = (larguraJanela - LARGURA * escala) / 2;
+            float sobraY = (alturaJanela - ALTURA * escala) / 2;
+
+            al_draw_scaled_bitmap(folha, 0, 0, LARGURA, ALTURA,
+                sobraX, sobraY, LARGURA * escala, ALTURA * escala, 0);
+
             al_flip_display();
         }
     }
 
+    al_destroy_bitmap(folha);
     al_destroy_bitmap(capa);
     al_destroy_font(fonte);
     al_destroy_timer(timer);
